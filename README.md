@@ -1,4 +1,4 @@
-## ADNI1 Dataset Folders:
+## ADNI Dataset Folders should have:
     |
     -- ADNI1-Complete 1Yr 3T (119 Subjects)
     -- ADNI1_Annual 2 Yr 3T  (89 Subjects)
