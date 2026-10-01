@@ -1,0 +1,16 @@
+Python 3.11 or 3.12
+# Because TensorFlow 2.x does NOT support Python 3.13
+
+tensorflow>=2.13.0,<2.16.0
+keras>=3.0.0
+numpy>=1.24.0,<2.0.0
+scipy>=1.11.0
+pandas>=2.0.0
+nibabel>=5.0.0
+scikit-learn>=1.3.0
+matplotlib>=3.7.0
+wandb>=0.16.0
+pyyaml>=6.0
+tqdm>=4.65.0
+
+

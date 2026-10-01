@@ -1,0 +1,94 @@
+data:
+  # Raw ADNI images are in shape of (256, 256, 170)
+  # We should preprocess first by running python preprocess_adni.py
+  # Then use data_dir: "Datasets/ADNI_Preprocessed"
+  # data_dir: "/scratch/eslami/datasets/ADNI_Merged" # Should uncomment when we want to do preprocessing on image data for the first time
+
+  data_dir: "/scratch/eslami/datasets/ADNI_Preprocessed"
+  csv_path: "/scratch/eslami/datasets/ADNI1_Combined_Unique_ImageDataID.csv"
+  # Target shape after preprocessing (2022 paper used [121, 145, 121])
+  input_shape: [121, 145, 121] 
+  use_original_size: false
+
+  # data_dir: "/scratch/eslami/datasets/ADNI_Resized" # Resized images to (100, 256, 170)
+  # csv_path: "/scratch/eslami/datasets/ADNI_Resized/metadata.csv" # Resized images to (100, 256, 170)
+  # # For pre-resized images (already resized to 100x256x170):
+  # input_shape: [100, 256, 170]  # Must match the actual size of resized images
+  # use_original_size: true  # Set to true when images are already the correct size (no resizing needed)
+ 
+  # Crop slices (30~130 instead of 0~255) to keep only informative ones (removes non-informative slices)
+  # Format: [start, end] - keeps slices from start to end-1
+  # Example: [30, 130] keeps slices 30-129 (100 slices total)
+  # This reduces shape from (256, 256, 170) to (100, 256, 170)
+  # crop_slices: [30, 130] # Should uncomment when we want to do preprocessing(Crop slices) on image data for the first time (preprocess_adni_2)
+  
+  # Data split ratios
+  train_ratio: 0.70
+  val_ratio: 0.15
+  test_ratio: 0.15
+  random_seed: null  # Use null (not none) for None in YAML
+  
+ # Filter by diagnosis for TRAIN set (null = use all)
+  # Options: CN (Cognitively Normal), MCI (Mild Cognitive Impairment), AD (Alzheimer's)
+  diagnosis_filter: null # ["CN"]  # Must be a LIST: ["CN", "AD"] or ["CN"] or null for all
+  
+  # Filter for VALIDATION set (null = use all diagnoses, same as train if not specified)
+  # It's recommended to set this to null if test_diagnosis_filter is null
+  val_diagnosis_filter: null  # null = all diagnoses (CN + MCI + AD)
+  
+  # Filter for TEST set (null = use all diagnoses for testing)
+  # If not specified, uses same as diagnosis_filter
+  test_diagnosis_filter: null  # null = all diagnoses (CN + MCI + AD)
+  
+  # Examples:
+  #   Train on CN only, validate and test on all:
+  #     diagnosis_filter: ["CN"]
+  #     val_diagnosis_filter: null
+  #     test_diagnosis_filter: null
+  #
+  #   Train on CN+AD, validate on CN+AD, test on all including MCI:
+  #     diagnosis_filter: ["CN", "AD"]
+  #     val_diagnosis_filter: ["CN", "AD"]
+  #     test_diagnosis_filter: null 
+
+  # Data splitting method
+  # Options: 'subject' (subject-level splitting - all scans from same subject stay together)
+  #          'scan' (scan-level splitting - individual scans split independently)
+  # Default: 'subject' (recommended to prevent data leakage)
+  splitting_method: "subject"  # Use "scan" to compare with scan-level splitting
+
+model:
+  # Model architecture: densenet, resnet, vgg16, sfcn, brainagenet, brainagenet_v2(AE-BrainAgeNet)
+  name: "brainagenet_v2"  # Enhanced V2 with attention mechanisms.
+  config: "standard"  # "light" (fastest), "standard" (balanced), "heavy" (best but slowest) only for brainagenet_v2
+  # name: "brainagenet"
+  # Optimizer: Adam, SGD, RMSprop
+  # optimizer: "Adam"
+  use_improved_loss: True  # Use combined MAE + correlation loss (True) only for brainagenet_v2
+
+training:
+  batch_size: 12 # Good for stable training
+  epochs: 50
+  iterations: 10
+  # the iterations in adni_train_torch.py are for progressive training with learning rate decay, not for averaging results
+  # the model trains with progressively lower learning rates, each iteration saves the model if it achieves the best validation MAE so far
+  learning_rate: 0.005
+  lr_decay: 0.5
+  patience: 10
+  
+  # Data augmentation settings
+  # Enable augmentation to improve model performance with limited data
+  use_augmentation: True  # Set to true to enable data augmentation
+  # Augmentation config: 'light' (rotation only), 'standard' (rotation+translation+intensity), 'heavy' (all including elastic)
+  augmentation_config: "standard"  # Recommended: 'standard' for balanced augmentation
+
+output:
+  output_dir: "output"
+
+preprocessing:
+  output_dir: "/scratch/eslami/datasets/ADNI_Preprocessed"  # Where preprocessed data will be saved
+  # After preprocessing, we must change data_dir above to this path
+
+cross_validation:
+  n_folds: 5
+  test_ratio: 0.15
