@@ -14,13 +14,13 @@
         301 belong to the MCI (Mild Cognitive Impairment) group, and
         98 belong to the AD (Alzheimer’s Disease) group
         
-    
-# In adni_train_torch.py, change line 27 from:
+# For Scan-level splitting:    
+    ## In adni_train_torch.py, change line 27 from:
 from adni_dataloader import ADNIDataLoader # Subject-level splitting
-# To:
+    ## To:
 from adni_dataloader_scan_level import ADNIDataLoaderScanLevel # Scan-level splitting
 
-# And change line 606 from:
+    ## And change line 606 from:
 data_loader_obj = ADNIDataLoader(...)
-# To:
+    ## To:
 data_loader_obj = ADNIDataLoaderScanLevel(...)
